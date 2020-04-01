@@ -1,65 +1,70 @@
 <html>
+
 <head>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['line']});
-      google.charts.setOnLoadCallback(fetchDataAndDrawAllCharts);
+        google.charts.load('current', {
+            'packages': ['line']
+        });
+        google.charts.setOnLoadCallback(fetchDataAndDrawAllCharts);
 
-    function drawChart(chartData, title, extractTimeSeriesFunc, div) {
-      var dataTable = new google.visualization.DataTable();
-      dataTable.addColumn('number', 'Seconds');
-      for (var i = 0; i < chartData.Devices.length; ++i) {
-        dataTable.addColumn('number', chartData.Devices[i].DeviceName)
-      }
+        function drawChart(chartData, title, extractTimeSeriesFunc, div) {
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('number', 'Seconds');
+            for (var i = 0; i < chartData.Devices.length; ++i) {
+                dataTable.addColumn('number', chartData.Devices[i].DeviceName)
+            }
 
-      var row = [];
-      row.push(0);
-      for (var i = 0; i < chartData.Devices.length; ++i) {
-        row.push(0);
-      }
-      dataTable.addRow(row);
+            var row = [];
+            row.push(0);
+            for (var i = 0; i < chartData.Devices.length; ++i) {
+                row.push(0);
+            }
+            dataTable.addRow(row);
 
-      for (var t = 1; t < chartData.FetchMilliseconds.length; ++t) {
-        var row = [];
-        row.push((chartData.FetchMilliseconds[t] - chartData.FetchMilliseconds[0]) / 1000);
-        for (var i = 0; i < chartData.Devices.length; ++i) {
-          var timeSeries = extractTimeSeriesFunc(chartData.Devices[i]);
-          row.push(timeSeries[t] - timeSeries[0]);
+            for (var t = 1; t < chartData.FetchMilliseconds.length; ++t) {
+                var row = [];
+                row.push((chartData.FetchMilliseconds[t] - chartData.FetchMilliseconds[0]) / 1000);
+                for (var i = 0; i < chartData.Devices.length; ++i) {
+                    var timeSeries = extractTimeSeriesFunc(chartData.Devices[i]);
+                    row.push(timeSeries[t] - timeSeries[0]);
+                }
+                dataTable.addRow(row);
+            }
+            var options = {
+                chart: {
+                    title: title,
+                },
+                width: 900,
+                height: 500,
+            };
+
+            var chart = new google.charts.Line(div);
+            chart.draw(dataTable, google.charts.Line.convertOptions(options));
         }
-        dataTable.addRow(row);
-      }
-      var options = {
-        chart: {
-          title: title,
-        },
-        width: 900,
-        height: 500,
-      };
 
-      var chart = new google.charts.Line(div);
-      chart.draw(dataTable, google.charts.Line.convertOptions(options));
-    }
-
-    function fetchDataAndDrawAllCharts() {
-      var req = new XMLHttpRequest();
-      req.open("GET", "/data", true);
-      req.onload = function (event) {
-        var chartData = JSON.parse(req.responseText);
-        drawChart(chartData,
-                  "Transmit Bytes",
-                  deviceData => deviceData.TransmitBytes,
-                  document.getElementById('transmit_bytes'));
-        drawChart(chartData,
-                  "Receive Bytes",
-                  deviceData => deviceData.ReceiveBytes,
-                  document.getElementById('receive_bytes'));
-      }
-      req.send()
-    }
-  </script>
+        function fetchDataAndDrawAllCharts() {
+            var req = new XMLHttpRequest();
+            req.open("GET", "/data", true);
+            req.onload = function(event) {
+                var chartData = JSON.parse(req.responseText);
+                drawChart(chartData,
+                    "Transmit Bytes",
+                    deviceData => deviceData.TransmitBytes,
+                    document.getElementById('transmit_bytes'));
+                drawChart(chartData,
+                    "Receive Bytes",
+                    deviceData => deviceData.ReceiveBytes,
+                    document.getElementById('receive_bytes'));
+            }
+            req.send()
+        }
+    </script>
 </head>
+
 <body>
-  <div id="transmit_bytes"></div>
-  <div id="receive_bytes"></div>
+    <div id="transmit_bytes"></div>
+    <div id="receive_bytes"></div>
 </body>
+
 </html>

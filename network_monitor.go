@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 var chartData *ChartData
@@ -90,7 +90,7 @@ type ChartData struct {
 	macAddressToDevice map[string]*DeviceData
 	Devices            []*DeviceData
 	FetchMilliseconds  []int64
-	mu sync.Mutex
+	mu                 sync.Mutex
 }
 
 func fetchDevices(chartData *ChartData) error {
@@ -193,8 +193,8 @@ func fetchLanStatistics(chartData *ChartData) error {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if data, err := ioutil.ReadFile("index.html"); err == nil {
-    w.Write(data)
-  } else {
+		w.Write(data)
+	} else {
 		w.WriteHeader(500)
 		w.Write([]byte(err.Error()))
 	}
@@ -224,14 +224,14 @@ func main() {
 	}
 	go func() {
 		for {
-		  if err := fetchLanStatistics(chartData); err != nil {
+			if err := fetchLanStatistics(chartData); err != nil {
 				log.Print(err)
 			}
-		  time.Sleep(10 * time.Second)
-	  }
+			time.Sleep(10 * time.Second)
+		}
 	}()
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/data", dataHandler)
 	log.Print("Serving request from http://localhost:8080")
-  log.Print(http.ListenAndServe(":8080", nil))
+	log.Print(http.ListenAndServe(":8080", nil))
 }
