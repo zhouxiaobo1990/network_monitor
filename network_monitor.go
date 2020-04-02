@@ -93,7 +93,7 @@ type ChartData struct {
 	mu                 sync.Mutex
 }
 
-func fetchDevices(chartData *ChartData) error {
+func fetchDevices() error {
 	doc, err := fetchAndParse("http://192.168.1.254/cgi-bin/devices.ha")
 	chartData.mu.Lock()
 	defer chartData.mu.Unlock()
@@ -145,7 +145,7 @@ func fetchDevices(chartData *ChartData) error {
 	return nil
 }
 
-func fetchLanStatistics(chartData *ChartData) error {
+func fetchLanStatistics() error {
 	doc, err := fetchAndParse("http://192.168.1.254/cgi-bin/lanstatistics.ha")
 	chartData.mu.Lock()
 	defer chartData.mu.Unlock()
@@ -176,12 +176,12 @@ func fetchLanStatistics(chartData *ChartData) error {
 				deviceData = chartData.macAddressToDevice[macAddress]
 			}
 			if deviceData != nil && columnIndex == 7 {
-				if bytes, err := strconv.ParseInt(strings.Trim(getInnerText(td), " \t\n"), 10, 32); err == nil {
+				if bytes, err := strconv.ParseInt(strings.Trim(getInnerText(td), " \t\n"), 10, 64); err == nil {
 					deviceData.TransmitBytes = append(deviceData.TransmitBytes, bytes)
 				}
 			}
 			if deviceData != nil && columnIndex == 8 {
-				if bytes, err := strconv.ParseInt(strings.Trim(getInnerText(td), " \t\n"), 10, 32); err == nil {
+				if bytes, err := strconv.ParseInt(strings.Trim(getInnerText(td), " \t\n"), 10, 64); err == nil {
 					deviceData.ReceiveBytes = append(deviceData.TransmitBytes, bytes)
 				}
 			}
@@ -219,12 +219,12 @@ func main() {
 		macAddressToDevice: make(map[string]*DeviceData),
 		Devices:            []*DeviceData{},
 		FetchMilliseconds:  []int64{}}
-	if err := fetchDevices(chartData); err != nil {
+	if err := fetchDevices(); err != nil {
 		log.Fatal(err)
 	}
 	go func() {
 		for {
-			if err := fetchLanStatistics(chartData); err != nil {
+			if err := fetchLanStatistics(); err != nil {
 				log.Print(err)
 			}
 			time.Sleep(10 * time.Second)
