@@ -182,7 +182,7 @@ func fetchLanStatistics() error {
 			}
 			if deviceData != nil && columnIndex == 8 {
 				if bytes, err := strconv.ParseInt(strings.Trim(getInnerText(td), " \t\n"), 10, 64); err == nil {
-					deviceData.ReceiveBytes = append(deviceData.TransmitBytes, bytes)
+					deviceData.ReceiveBytes = append(deviceData.ReceiveBytes, bytes)
 				}
 			}
 			columnIndex++
